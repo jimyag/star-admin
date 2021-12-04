@@ -1,4 +1,4 @@
-# star-admin
+# 资助星的后台管理系统
 
 ## Project setup
 ```
