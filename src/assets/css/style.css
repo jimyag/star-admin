@@ -1,0 +1,10 @@
+/*
+设置html body占满整个元素
+*/
+html,
+body,
+#app{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
