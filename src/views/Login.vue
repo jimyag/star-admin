@@ -67,7 +67,7 @@ export default {
         // }
         window.sessionStorage.setItem("token","sssssssssssssssssssssss")
         this.$message.success("登录成功")
-        await this.$router.push('/admin/index')
+        await this.$router.push('/index')
       })
     }
   }
