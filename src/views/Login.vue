@@ -29,11 +29,15 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item class="loginBtn">
+
+          <a-button type="info" shape="circle" :size="size" @click="resetForm" style="margin: 10px">
+            <a-icon type="close-circle" />
+          </a-button>
           <a-button type="primary" @click="login" style="margin: 10px">
             登录
           </a-button>
-          <a-button type="info" @click="resetForm" style="margin: 10px">
-            取消
+          <a-button type="primary"  @click="register" style="margin: 10px" >
+            点我注册
           </a-button>
         </a-form-model-item>
       </a-form-model>
@@ -81,6 +85,9 @@ export default {
   methods: {
     resetForm() {
       this.$refs.loginFormRef.resetFields()
+    },
+    register(){
+      this.$router.push('/register')
     },
     login() {
       // console.log(this.$refs)
