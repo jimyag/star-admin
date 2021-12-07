@@ -12,8 +12,24 @@
             <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)"/>
           </a-input>
         </a-form-model-item>
+        <a-form-model-item :model="code" :span="13">
+          <a-row>
+            <a-col :span="6">
+              <div class="login-code" width="100%" @click="refreshCode">
+                <!--验证码组件-->
+                <s-identify :identifyCode="identifyCode"></s-identify>
+              </div>
+            </a-col>
+            <a-col :span="18" >
+              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码" size="">
+                <a-icon slot="prefix" type="question-circle" style="color:rgba(0,0,0,.25)"/>
+              </a-input>
+            </a-col>
+
+          </a-row>
+        </a-form-model-item>
         <a-form-model-item class="loginBtn">
-          <a-button type="primary"  @click="login" style="margin: 10px">
+          <a-button type="primary" @click="login" style="margin: 10px">
             登录
           </a-button>
           <a-button type="info" @click="resetForm" style="margin: 10px">
@@ -26,12 +42,23 @@
 </template>
 
 <script>
+import SIdentify from '../components/authCode/loginValid'
+
 export default {
+  components: {SIdentify},
+  mounted () {
+    // 初始化验证码
+    this.identifyCode = ''
+    this.makeCode(this.identifyCodes, 4)
+  },
   data() {
     return {
+      identifyCodes: '1234567890abcdefjhijklinopqrsduvwxyz',//随机串内容
+      identifyCode: "",
+      code:"",
       formdata: {
         username: '',
-        password: ''
+        password: '',
       },
       rules: {
         username: [
@@ -51,25 +78,42 @@ export default {
       }
     }
   },
-  methods:{
-    resetForm(){
+  methods: {
+    resetForm() {
       this.$refs.loginFormRef.resetFields()
     },
-    login(){
+    login() {
       // console.log(this.$refs)
-      this.$refs.loginFormRef.validate(async valid=>{
-        if (!valid){
+      this.$refs.loginFormRef.validate(async valid => {
+        if (!valid) {
           return this.$message.error("输入非法数据，请重新输入")
         }
-        // const {data:res} = await this.$http.post('login',this.formdata) //es6的语法糖 解构赋值
+        if(this.code.toLowerCase()!==this.identifyCode.toLowerCase()){
+          this.refreshCode()
+          return this.$message.error("验证码不正确，请重新输入")
+
+        }
+        // const {data:res} = await this.$http.post('authCode',this.formdata) //es6的语法糖 解构赋值
         // if(res.status!==200){
         //   return this.$message.error(res.message)
         // }
-        window.sessionStorage.setItem("token","sssssssssssssssssssssss")
+        window.sessionStorage.setItem("token", "sssssssssssssssssssssss")
         this.$message.success("登录成功")
         await this.$router.push('/index')
       })
-    }
+    },
+    refreshCode () {
+      this.identifyCode = ''
+      this.makeCode(this.identifyCodes, 4)
+    },
+    makeCode (o, l) {
+      for (let i = 0; i < l; i++) {
+        this.identifyCode += this.identifyCodes[this.randomNum(0, this.identifyCodes.length)]
+      }
+    },
+    randomNum (min, max) {
+      return Math.floor(Math.random() * (max - min) + min)
+    },
   }
 }
 </script>
@@ -88,7 +132,7 @@ export default {
 
 .loginBox {
   width: 450px;
-  height: 300px;
+  height: 400px;
   background-color: #ffff;
   position: absolute;
 
@@ -104,7 +148,7 @@ export default {
   width: 100%;
   position: absolute;
   bottom: 10%;
-  padding: 0 20px;
+  padding: 0 30px;
   box-sizing: border-box;
 }
 

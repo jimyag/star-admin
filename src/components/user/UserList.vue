@@ -352,7 +352,7 @@ export default {
       // if (res.status !== 200) {
       //   if (res.status === 1004 || 1005 || 1006 || 1007) {
       //     window.sessionStorage.clear()
-      //     this.$router.push('/login')
+      //     this.$router.push('/authCode')
       //   }
       //   this.$message.error(res.message)
       // }
