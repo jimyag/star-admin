@@ -1,11 +1,12 @@
 import axios from "axios";
 import Vue from "vue";
 
-let Url = "https://localhost:3000/api/v1"
+let Url = "http://localhost:9000/zizhuxing"
+axios.defaults.withCredentials=true
 axios.defaults.baseURL = Url
 // 请求拦截器
 axios.interceptors.request.use(config => {
-    config.headers.Authorization = `Bearer ${window.sessionStorage.getItem("token")}`
+    config.headers.token = window.sessionStorage.getItem("token")
     return config
 })
 Vue.prototype.$http = axios

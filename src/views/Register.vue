@@ -35,7 +35,7 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item class="loginBtn">
-          <a-button type="primary" @click="register" style="margin: 10px">
+          <a-button type="primary" @click="register" @keyup.enter="register" style="margin: 10px">
             注册
           </a-button>
           <a-button type="primary" @click="login" style="margin: 10px">
@@ -88,7 +88,7 @@ export default {
               if (this.newUser.password === '') {
                 callback(new Error('请输入密码'))
               }
-              if ([...this.newUser.password].length < 6 || [...this.newUser.password].length > 20) {
+              if ([...this.newUser.password].length < 10 || [...this.newUser.password].length > 20) {
                 callback(new Error('密码应当在6到20位之间'))
               } else {
                 callback()
@@ -136,10 +136,11 @@ export default {
           return this.$message.error("验证码不正确，请重新输入")
 
         }
-        // const {data:res} = await this.$http.post('authCode',this.formdata) //es6的语法糖 解构赋值
-        // if(res.status!==200){
-        //   return this.$message.error(res.message)
-        // }
+        const {data: res} = await this.$http.post('/register', this.newUser) //es6的语法糖 解构赋值
+        console.log(res)
+        if (res.code !== 0) {
+          return this.$message.error(res.msg)
+        }
         this.$message.success("注册成功，请登录")
         await this.$router.push('/login')
       })

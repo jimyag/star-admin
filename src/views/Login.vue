@@ -20,7 +20,7 @@
                 <s-identify :identifyCode="identifyCode"></s-identify>
               </div>
             </a-col>
-            <a-col :span="18" >
+            <a-col :span="18">
               <a-input v-model="code" auto-complete="off" placeholder="请输入验证码" size="">
                 <a-icon slot="prefix" type="question-circle" style="color:rgba(0,0,0,.25)"/>
               </a-input>
@@ -31,12 +31,12 @@
         <a-form-model-item class="loginBtn">
 
           <a-button type="info" shape="circle" :size="size" @click="resetForm" style="margin: 10px">
-            <a-icon type="close-circle" />
+            <a-icon type="close-circle"/>
           </a-button>
-          <a-button type="primary" @click="login" style="margin: 10px">
+          <a-button type="primary" @click="login" @keyup.enter="login" style="margin: 10px">
             登录
           </a-button>
-          <a-button type="primary"  @click="register" style="margin: 10px" >
+          <a-button type="primary" @click="register" style="margin: 10px">
             点我注册
           </a-button>
         </a-form-model-item>
@@ -50,7 +50,7 @@ import SIdentify from '../components/authCode/loginValid'
 
 export default {
   components: {SIdentify},
-  mounted () {
+  mounted() {
     // 初始化验证码
     this.identifyCode = ''
     this.makeCode(this.identifyCodes, 4)
@@ -59,7 +59,7 @@ export default {
     return {
       identifyCodes: '1234567890abcdefjhijklinopqrsduvwxyz',//随机串内容
       identifyCode: "",
-      code:"",
+      code: "",
       formdata: {
         username: '',
         password: '',
@@ -72,12 +72,6 @@ export default {
         password: [
           {required: true, message: "请输入密码", trigger: 'blur'},
           {min: 10, max: 20, message: "密码必须在10-20字符之间", trigger: 'blur'}
-          // {
-          //   required: true,
-          //   pattern: new RegExp(/^1[3456789]\d{9}$/),
-          //   message: '密码必须全数字',
-          //   trigger: 'blur'
-          // }
         ]
       }
     }
@@ -86,7 +80,7 @@ export default {
     resetForm() {
       this.$refs.loginFormRef.resetFields()
     },
-    register(){
+    register() {
       this.$router.push('/register')
     },
     login() {
@@ -95,30 +89,36 @@ export default {
         if (!valid) {
           return this.$message.error("输入非法数据，请重新输入")
         }
-        if(this.code.toLowerCase()!==this.identifyCode.toLowerCase()){
+        if (this.code.toLowerCase() !== this.identifyCode.toLowerCase()) {
           this.refreshCode()
           return this.$message.error("验证码不正确，请重新输入")
 
         }
-        // const {data:res} = await this.$http.post('authCode',this.formdata) //es6的语法糖 解构赋值
-        // if(res.status!==200){
-        //   return this.$message.error(res.message)
-        // }
-        window.sessionStorage.setItem("token", "sssssssssssssssssssssss")
-        this.$message.success("登录成功")
-        await this.$router.push('/index')
+        const {data:res}= await this.$http.post("/login",this.formdata)
+        if(res.code===0){
+          if(res.data.user.role!==1){
+            this.refreshCode()
+            return this.$message.error("权限不足")
+          }
+          window.sessionStorage.setItem("token", res.data.token)
+          this.$message.success("登录成功")
+          await this.$router.push("/index")
+        }else {
+          this.refreshCode()
+          this.$message.info(res.msg)
+        }
       })
     },
-    refreshCode () {
+    refreshCode() {
       this.identifyCode = ''
       this.makeCode(this.identifyCodes, 4)
     },
-    makeCode (o, l) {
+    makeCode(o, l) {
       for (let i = 0; i < l; i++) {
         this.identifyCode += this.identifyCodes[this.randomNum(0, this.identifyCodes.length)]
       }
     },
-    randomNum (min, max) {
+    randomNum(min, max) {
       return Math.floor(Math.random() * (max - min) + min)
     },
   }

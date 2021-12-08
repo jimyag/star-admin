@@ -118,12 +118,11 @@
 </template>
 
 <script>
-import day from 'dayjs'
 
 const columns = [
   {
     title: 'ID',
-    dataIndex: 'ID',
+    dataIndex: 'id',
     width: '10%',
     key: 'id',
     align: 'center',
@@ -134,16 +133,6 @@ const columns = [
     width: '20%',
     key: 'username',
     align: 'center',
-  },
-  {
-    title: '注册时间',
-    dataIndex: 'CreatedAt',
-    width: '20%',
-    key: 'CreatedAt',
-    align: 'center',
-    customRender: (val) => {
-      return val ? day(val).format('YYYY年MM月DD日 HH:mm') : '暂无'
-    },
   },
   {
     title: '角色',
@@ -218,8 +207,8 @@ export default {
               if (this.userInfo.password === '') {
                 callback(new Error('请输入密码'))
               }
-              if ([...this.userInfo.password].length < 6 || [...this.userInfo.password].length > 20) {
-                callback(new Error('密码应当在6到20位之间'))
+              if ([...this.userInfo.password].length < 10 || [...this.userInfo.password].length > 20) {
+                callback(new Error('密码应当在10到20位之间'))
               } else {
                 callback()
               }
@@ -265,8 +254,8 @@ export default {
               if (this.newUser.password === '') {
                 callback(new Error('请输入密码'))
               }
-              if ([...this.newUser.password].length < 6 || [...this.newUser.password].length > 20) {
-                callback(new Error('密码应当在6到20位之间'))
+              if ([...this.newUser.password].length < 10 || [...this.newUser.password].length > 20) {
+                callback(new Error('密码应当在10-20位之间'))
               } else {
                 callback()
               }
@@ -297,8 +286,8 @@ export default {
               if (this.changePassword.password === '') {
                 callback(new Error('请输入密码'))
               }
-              if ([...this.changePassword.password].length < 6 || [...this.changePassword.password].length > 20) {
-                callback(new Error('密码应当在6到20位之间'))
+              if ([...this.changePassword.password].length < 10 || [...this.changePassword.password].length > 20) {
+                callback(new Error('密码应当在10到20位之间'))
               } else {
                 callback()
               }
@@ -342,6 +331,21 @@ export default {
   methods: {
     // 获取用户列表
     async getUserList() {
+      console.log("ttttt")
+      console.log(this.queryParam.username)
+      console.log("ssssssssss")
+      const {data: res} = await this.$http.get("/user", {
+        params: {
+          usernam: this.queryParam.username,
+          pagesize: this.queryParam.pagesize,
+          pagenum: this.queryParam.pagenum
+        }
+      })
+      if (res.code !== 0) {
+        return this.$message.error(res.msg);
+      }
+      this.userlist = res.data.data
+      this.pagination.total = res.data.total
       // const {data: res} = await this.$http.get('admin/users', {
       //   params: {
       //     username: this.queryParam.username,
@@ -363,16 +367,16 @@ export default {
     async searchUser() {
       this.queryParam.pagenum = 1
       this.pagination.current = 1
-      // const {data: res} = await this.$http.get('admin/users', {
-      //   params: {
-      //     username: this.queryParam.username,
-      //     pagesize: this.queryParam.pagesize,
-      //     pagenum: this.queryParam.pagenum,
-      //   },
-      // })
-      // if (res.status !== 200) return this.$message.error(res.message)
-      // this.userlist = res.data
-      // this.pagination.total = res.total
+      const {data: res} = await this.$http.get('/user', {
+        params: {
+          username: this.queryParam.username,
+          pagesize: this.queryParam.pagesize,
+          pagenum: this.queryParam.pagenum,
+        },
+      })
+      if (res.code !== 0) return this.$message.error(res.msg)
+      this.userlist = res.data.data
+      this.pagination.total = res.total
     },
     // 更改分页
     handleTableChange(pagination, filters, sorter) {
@@ -410,16 +414,23 @@ export default {
     addUserOk() {
       this.$refs.addUserRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数不符合要求，请重新输入')
+        const {data: res} = await this.$http.post('/register', this.newUser) //es6的语法糖 解构赋值
+        console.log(res)
+        if (res.code !== 0) {
+          return this.$message.error(res.msg)
+        }
+        this.$refs.addUserRef.resetFields()
+        this.addUserVisible = false
+        this.$message.success('添加用户成功')
+        this.getUserList()
+
         // const {data: res} = await this.$http.post('user/add', {
         //   username: this.newUser.username,
         //   password: this.newUser.password,
         //   role: this.newUser.role,
         // })
         // if (res.status != 200) return this.$message.error(res.message)
-        this.$refs.addUserRef.resetFields()
-        this.addUserVisible = false
-        this.$message.success('添加用户成功')
-        this.getUserList()
+
       })
     },
     addUserCancel() {
