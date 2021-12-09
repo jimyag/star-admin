@@ -24,7 +24,7 @@
           bordered
           @change="handleTableChange"
       >
-        <span slot="role" slot-scope="data">{{ data == 1 ? '管理员' : '订阅者' }}</span>
+        <span slot="role" slot-scope="data">{{ data == 1 ? '管理员' : '用户' }}</span>
         <template slot="action" slot-scope="data">
           <div class="actionSlot">
             <a-button
@@ -66,6 +66,9 @@
         </a-form-model-item>
         <a-form-model-item has-feedback label="确认密码" prop="checkpass">
           <a-input-password v-model="newUser.checkpass"></a-input-password>
+        </a-form-model-item>
+        <a-form-model-item has-feedback label="邮箱" prop="email">
+          <a-input v-model="newUser.email"></a-input>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -136,21 +139,28 @@ const columns = [
   {
     title: '用户名',
     dataIndex: 'username',
-    width: '20%',
+    width: '25%',
     key: 'username',
+    align: 'center',
+  },
+  {
+    title: '邮箱',
+    dataIndex: 'email',
+    width: '25%',
+    key: 'email',
     align: 'center',
   },
   {
     title: '角色',
     dataIndex: 'role',
-    width: '20%',
+    width: '10%',
     key: 'role',
     align: 'center',
     scopedSlots: {customRender: 'role'},
   },
   {
     title: '操作',
-    width: '30%',
+    width: '15%',
     key: 'action',
     align: 'center',
     scopedSlots: {customRender: 'action'},
@@ -181,6 +191,7 @@ export default {
         password: '',
         role: 2,
         checkPass: '',
+        email: "",
       },
       changePassword: {
         id: 0,
@@ -218,6 +229,7 @@ export default {
       addUserRules: {
         username: validateUsername,
         password: validatePassword,
+        email: validateEmail,
         checkpass: [
           {
             validator: (rule, value, callback) => {
@@ -264,11 +276,7 @@ export default {
   },
   computed: {
     IsAdmin: function () {
-      if (this.userInfo.role === 1) {
-        return true
-      } else {
-        return false
-      }
+      return this.userInfo.role === 1;
     },
   },
   methods: {
@@ -276,7 +284,7 @@ export default {
     async getUserList() {
       const {data: res} = await this.$http.get("/users", {
         params: {
-          usernam: this.queryParam.username,
+          username: this.queryParam.username,
           pagesize: this.queryParam.pagesize,
           pagenum: this.queryParam.pagenum
         }
@@ -291,7 +299,7 @@ export default {
     async searchUser() {
       this.queryParam.pagenum = 1
       this.pagination.current = 1
-      const {data: res} = await this.$http.get('/user', {
+      const {data: res} = await this.$http.get('/users', {
         params: {
           username: this.queryParam.username,
           pagesize: this.queryParam.pagesize,
@@ -300,12 +308,12 @@ export default {
       })
       if (res.code !== 0) return this.$message.error(res.msg)
       this.userlist = res.data.data
-      this.pagination.total = res.total
+      // this.pagination.total = res.total
     },
     // 更改分页
     handleTableChange(pagination, filters, sorter) {
       console.log(filters, sorter)
-      var pager = {...this.pagination}
+      const pager = {...this.pagination};
       pager.current = pagination.current
       pager.pageSize = pagination.pageSize
       this.queryParam.pagesize = pagination.pageSize
