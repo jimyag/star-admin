@@ -31,14 +31,14 @@
                 type="primary"
                 icon="edit"
                 style="margin-right: 15px"
-                @click="editUser(data.ID)"
+                @click="editUser(data.id)"
             >编辑
             </a-button>
             <a-button
                 type="danger"
                 icon="delete"
                 style="margin-right: 15px"
-                @click="deleteUser(data.username)"
+                @click="deleteUser(data.id)"
             >删除
             </a-button>
             <a-button type="info" icon="info" @click="ChangePassword(data.ID)">修改密码</a-button>
@@ -331,10 +331,7 @@ export default {
   methods: {
     // 获取用户列表
     async getUserList() {
-      console.log("ttttt")
-      console.log(this.queryParam.username)
-      console.log("ssssssssss")
-      const {data: res} = await this.$http.get("/user", {
+      const {data: res} = await this.$http.get("/users", {
         params: {
           usernam: this.queryParam.username,
           pagesize: this.queryParam.pagesize,
@@ -346,22 +343,6 @@ export default {
       }
       this.userlist = res.data.data
       this.pagination.total = res.data.total
-      // const {data: res} = await this.$http.get('admin/users', {
-      //   params: {
-      //     username: this.queryParam.username,
-      //     pagesize: this.queryParam.pagesize,
-      //     pagenum: this.queryParam.pagenum,
-      //   },
-      // })
-      // if (res.status !== 200) {
-      //   if (res.status === 1004 || 1005 || 1006 || 1007) {
-      //     window.sessionStorage.clear()
-      //     this.$router.push('/authCode')
-      //   }
-      //   this.$message.error(res.message)
-      // }
-      // this.userlist = res.data
-      // this.pagination.total = res.total
     },
     // 搜索用户
     async searchUser() {
@@ -394,13 +375,12 @@ export default {
       this.getUserList()
     },
     // 删除用户
-    deleteUser(username) {
-      console.log(username)
+    deleteUser(id) {
       this.$confirm({
         title: '提示：请再次确认',
         content: '确定要删除该用户吗？一旦删除，无法恢复',
         onOk: async () => {
-          const {data: res} = await this.$http.delete(`user?username=${username}`)
+          const {data: res} = await this.$http.delete(`user/${id}`)
           if (res.code !== 0) return this.$message.error(res.msg)
           this.$message.success('删除成功')
           await this.getUserList()
@@ -440,21 +420,20 @@ export default {
     // 编辑用户
     async editUser(id) {
       this.editUserVisible = true
-      // const {data: res} = await this.$http.get(`user/${id}`)
-      // this.userInfo = res.data
-      this.userInfo.id = id
+      const {data: res} = await this.$http.get(`user/${id}`)
+      this.userInfo = res.data
     },
     editUserOk() {
       this.$refs.addUserRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数不符合要求，请重新输入')
-        // const {data: res} = await this.$http.put(`user/${this.userInfo.id}`, {
-        //   username: this.userInfo.username,
-        //   role: this.userInfo.role,
-        // })
-        // if (res.status != 200) return this.$message.error(res.message)
+        const {data: res} = await this.$http.put(`user/${this.userInfo.id}`, {
+          username: this.userInfo.username,
+          role: this.userInfo.role,
+        })
+        if (res.code !== 0) return this.$message.error(res.msg)
         this.editUserVisible = false
         this.$message.success('更新用户信息成功')
-        this.getUserList()
+        await this.getUserList()
       })
     },
     editUserCancel() {
