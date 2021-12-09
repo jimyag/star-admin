@@ -20,4 +20,13 @@ const validateEmail = [
         message: "邮箱格式不合法"
     }
 ]
-export {validatePassword, validateUsername, validateEmail}
+
+const validateCode = [
+    {
+        required: true,
+        pattern: /[0-9]{5}/,
+        trigger: "blur",
+        message: "请输入5位数字"
+    }
+]
+export {validatePassword, validateUsername, validateEmail,validateCode}

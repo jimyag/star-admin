@@ -17,6 +17,7 @@ import {Button,
     Modal,
     Select,
     Switch,
+    Dropdown
 } from 'ant-design-vue';
 
 message.config({
@@ -40,4 +41,5 @@ Vue.use(ConfigProvider)
 Vue.use(Modal)
 Vue.use(Select)
 Vue.use(Switch)
+Vue.use(Dropdown)
 

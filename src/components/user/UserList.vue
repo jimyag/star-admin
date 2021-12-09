@@ -24,7 +24,7 @@
           bordered
           @change="handleTableChange"
       >
-        <span slot="role" slot-scope="data">{{ data == 1 ? '管理员' : '用户' }}</span>
+        <span slot="role" slot-scope="data">{{ powers(data) }}</span>
         <template slot="action" slot-scope="data">
           <div class="actionSlot">
             <a-button
@@ -90,13 +90,24 @@
         <a-form-model-item label="邮箱" prop="email">
           <a-input v-model="userInfo.email"></a-input>
         </a-form-model-item>
-        <a-form-model-item label="是否为管理员">
-          <a-switch
-              :checked="IsAdmin"
-              checked-children="是"
-              un-checked-children="否"
-              @change="adminChange"
-          />
+        <a-form-model-item label="权限选择">
+          <a-select v-model="poewer" style="width: 120px" @change="handleChange">
+            <a-select-option value="1">
+              管理员
+            </a-select-option>
+            <a-select-option value="2">
+              青铜
+            </a-select-option>
+            <a-select-option value="3">
+              白银用户
+            </a-select-option>
+            <a-select-option value="4">
+              黄金用户
+            </a-select-option>
+            <a-select-option value="5">
+              铂金用户
+            </a-select-option>
+          </a-select>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -171,6 +182,7 @@ import {validatePassword, validateUsername, validateEmail} from "@/plugin/valida
 export default {
   data() {
     return {
+      poewer: "",
       pagination: {
         pageSizeOptions: ['5', '10', '20'],
         pageSize: 5,
@@ -280,6 +292,22 @@ export default {
     },
   },
   methods: {
+    powers(index) {
+      if (index === 1) {
+        return "管理员"
+      } else if (index === 2) {
+        return "青铜用户"
+      } else if (index === 3) {
+        return "白银用户"
+      } else if (index === 4) {
+        return "黄金用户"
+      } else {
+        return "铂金用户"
+      }
+    },
+    handleChange(value) {
+      this.userInfo.role = value
+    },
     // 获取用户列表
     async getUserList() {
       const {data: res} = await this.$http.get("/users", {
@@ -360,18 +388,12 @@ export default {
       this.addUserVisible = false
       this.$message.info('新增用户已取消')
     },
-    adminChange(checked) {
-      if (checked) {
-        this.userInfo.role = 1
-      } else {
-        this.userInfo.role = 2
-      }
-    },
     // 编辑用户
     async editUser(id) {
       this.editUserVisible = true
       const {data: res} = await this.$http.get(`user/${id}`)
       this.userInfo = res.data
+      this.poewer = this.powers(this.userInfo.role)
     },
     editUserOk() {
       this.$refs.addUserRef.validate(async (valid) => {
@@ -385,6 +407,10 @@ export default {
           role: this.userInfo.role,
         })
         if (res.code !== 0) return this.$message.error(res.msg)
+        const {data: resEmail} = await this.$http.put(`user/${this.userInfo.id}/email`, {
+          email: this.userInfo.email,
+        })
+        if (resEmail.code !== 0) return this.$message.error(resEmail.msg)
         this.editUserVisible = false
         this.$message.success('更新用户信息成功')
         await this.getUserList()
