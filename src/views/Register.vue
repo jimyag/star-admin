@@ -23,6 +23,22 @@
             <a-icon slot="prefix" type="mail" style="color:rgba(0,0,0,.25)"/>
           </a-input>
         </a-form-model-item>
+        <a-form-model-item has-feedback prop="code">
+          <a-row>
+            <a-col :span="18">
+              <a-input v-model="newUser.code" placeholder="请输入5位验证码">
+                <a-icon slot="prefix" type="insurance" style="color:rgba(0,0,0,.25)"/>
+              </a-input>
+            </a-col>
+            <a-col :span="6">
+              <a-col :span="6">
+                <a-button @click="handleSend" :disabled="msgKey">{{ msgText }}</a-button>
+              </a-col>
+            </a-col>
+
+          </a-row>
+
+        </a-form-model-item>
         <!--验证码-->
         <a-form-model-item :model="code" :span="13">
           <a-row>
@@ -32,7 +48,7 @@
               </div>
             </a-col>
             <a-col :span="18">
-              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码">
+              <a-input v-model="code" auto-complete="on" placeholder="请输入验证码">
                 <a-icon slot="prefix" type="question-circle" style="color:rgba(0,0,0,.25)"/>
               </a-input>
             </a-col>
@@ -55,9 +71,13 @@
 
 <script>
 import SIdentify from '../components/authCode/loginValid'
-import {validatePassword,validateUsername,validateEmail} from "@/plugin/validator";
-
+import {validatePassword, validateUsername, validateEmail, validateCode} from "@/plugin/validator";
+const MSGINIT = '发送验证码'
+// const MSGERROR = '验证码发送失败'
+const MSGSCUCCESS = '${time}秒后重发'
+const MSGTIME = 60
 export default {
+
   components: {SIdentify},
   mounted() {
     // 初始化验证码
@@ -66,17 +86,22 @@ export default {
   },
   data() {
     return {
+      msgText: MSGINIT,
+      msgTime: MSGTIME,
+      msgKey: false,
       newUser: {
         email: "",
         username: '',
         password: '',
         role: 2,
         checkPass: '',
+        code: "",
       },
       addUserRules: {
         email: validateEmail,
         username: validateUsername,
         password: validatePassword,
+        code: validateCode,
         checkpass: [
           {
             validator: (rule, value, callback) => {
@@ -99,6 +124,32 @@ export default {
     }
   },
   methods: {
+    handleSend() {
+      this.$refs.addUserRef.validateField("email",(verifycode_check)=>{
+        if(verifycode_check){
+          return this.$message.error("邮箱验证未通过")
+        }
+        else {
+          this.$message.info("验证码已发送，请注意查收")
+          if (this.msgKey) return
+
+          this.msgText = MSGSCUCCESS.replace('${time}', this.msgTime)
+          this.msgKey = true
+          const time = setInterval(() => {
+            this.msgTime--
+            this.msgText = MSGSCUCCESS.replace('${time}', this.msgTime)
+            const msgKey = false;
+            if (this.msgTime === 0) {
+              this.msgTime = MSGTIME
+              this.msgText = MSGINIT
+              this.msgKey = msgKey
+              clearInterval(time)
+            }
+          }, 1000)
+        }
+      })
+
+    },
     resetForm() {
       this.$refs.addUserRef.resetFields()
     },
@@ -157,7 +208,7 @@ export default {
 
 .loginBox {
   width: 450px;
-  height: 400px;
+  height: 600px;
   background-color: #ffff;
   position: absolute;
 
