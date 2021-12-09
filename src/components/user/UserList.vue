@@ -38,7 +38,7 @@
                 type="danger"
                 icon="delete"
                 style="margin-right: 15px"
-                @click="deleteUser(data.ID)"
+                @click="deleteUser(data.username)"
             >删除
             </a-button>
             <a-button type="info" icon="info" @click="ChangePassword(data.ID)">修改密码</a-button>
@@ -394,16 +394,16 @@ export default {
       this.getUserList()
     },
     // 删除用户
-    deleteUser(id) {
-      console.log(id)
+    deleteUser(username) {
+      console.log(username)
       this.$confirm({
         title: '提示：请再次确认',
         content: '确定要删除该用户吗？一旦删除，无法恢复',
         onOk: async () => {
-          // const {data: res} = await this.$http.delete(`user/${id}`)
-          // if (res.status != 200) return this.$message.error(res.message)
+          const {data: res} = await this.$http.delete(`user?username=${username}`)
+          if (res.code !== 0) return this.$message.error(res.msg)
           this.$message.success('删除成功')
-          this.getUserList()
+          await this.getUserList()
         },
         onCancel: () => {
           this.$message.info('已取消删除')
@@ -423,14 +423,6 @@ export default {
         this.addUserVisible = false
         this.$message.success('添加用户成功')
         this.getUserList()
-
-        // const {data: res} = await this.$http.post('user/add', {
-        //   username: this.newUser.username,
-        //   password: this.newUser.password,
-        //   role: this.newUser.role,
-        // })
-        // if (res.status != 200) return this.$message.error(res.message)
-
       })
     },
     addUserCancel() {
