@@ -84,6 +84,9 @@
         <a-form-model-item label="用户名" prop="username">
           <a-input v-model="userInfo.username"></a-input>
         </a-form-model-item>
+        <a-form-model-item label="邮箱" prop="email">
+          <a-input v-model="userInfo.email"></a-input>
+        </a-form-model-item>
         <a-form-model-item label="是否为管理员">
           <a-switch
               :checked="IsAdmin"
@@ -153,6 +156,8 @@ const columns = [
     scopedSlots: {customRender: 'action'},
   },
 ]
+import {validatePassword, validateUsername, validateEmail} from "@/plugin/validator";
+
 export default {
   data() {
     return {
@@ -168,6 +173,7 @@ export default {
         username: '',
         password: '',
         role: 2,
+        email: "",
         checkPass: '',
       },
       newUser: {
@@ -191,36 +197,8 @@ export default {
       },
       editVisible: false,
       userRules: {
-        username: [
-          {
-            validator: (rule, value, callback) => {
-              if (this.userInfo.username === '') {
-                callback(new Error('请输入用户名'))
-              }
-              if ([...this.userInfo.username].length < 4 || [...this.userInfo.username].length > 12) {
-                callback(new Error('用户名应当在4到12个字符之间'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
-        password: [
-          {
-            validator: (rule, value, callback) => {
-              if (this.userInfo.password === '') {
-                callback(new Error('请输入密码'))
-              }
-              if ([...this.userInfo.password].length < 10 || [...this.userInfo.password].length > 20) {
-                callback(new Error('密码应当在10到20位之间'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
+        username: validateUsername,
+        password: validatePassword,
         checkpass: [
           {
             validator: (rule, value, callback) => {
@@ -238,36 +216,8 @@ export default {
         ],
       },
       addUserRules: {
-        username: [
-          {
-            validator: (rule, value, callback) => {
-              if (this.newUser.username === '') {
-                callback(new Error('请输入用户名'))
-              }
-              if ([...this.newUser.username].length < 4 || [...this.newUser.username].length > 12) {
-                callback(new Error('用户名应当在4到12个字符之间'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
-        password: [
-          {
-            validator: (rule, value, callback) => {
-              if (this.newUser.password === '') {
-                callback(new Error('请输入密码'))
-              }
-              if ([...this.newUser.password].length < 10 || [...this.newUser.password].length > 20) {
-                callback(new Error('密码应当在10-20位之间'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
+        username: validateUsername,
+        password: validatePassword,
         checkpass: [
           {
             validator: (rule, value, callback) => {
@@ -285,36 +235,9 @@ export default {
         ],
       },
       changePasswordRules: {
-        oldPassword:[
-          {
-            validator: (rule, value, callback) => {
-              if (this.changePassword.oldPassword === '') {
-                callback(new Error('请输入原密码'))
-              }
-              if ([...this.changePassword.oldPassword].length < 10 || [...this.changePassword.oldPassword].length > 20) {
-                callback(new Error('密码应当在10到20位之间'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
-        password: [
-          {
-            validator: (rule, value, callback) => {
-              if (this.changePassword.password === '') {
-                callback(new Error('请输入密码'))
-              }
-              if ([...this.changePassword.password].length < 10 || [...this.changePassword.password].length > 20) {
-                callback(new Error('密码应当在10到20位之间'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
+        oldPassword: validatePassword,
+        password: validatePassword,
+        email: validateEmail,
         checkpass: [
           {
             validator: (rule, value, callback) => {
@@ -421,7 +344,7 @@ export default {
         this.$refs.addUserRef.resetFields()
         this.addUserVisible = false
         this.$message.success('添加用户成功')
-        this.getUserList()
+        await this.getUserList()
       })
     },
     addUserCancel() {
@@ -485,7 +408,7 @@ export default {
         if (res.code !== 0) return this.$message.error(res.msg)
         this.changePasswordVisible = false
         this.$message.success('修改密码成功')
-        this.getUserList()
+        await this.getUserList()
         this.$refs.changePasswordRef.resetFields()
       })
     },

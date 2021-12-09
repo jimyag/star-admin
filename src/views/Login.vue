@@ -21,7 +21,7 @@
               </div>
             </a-col>
             <a-col :span="18">
-              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码" >
+              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码">
                 <a-icon slot="prefix" type="question-circle" style="color:rgba(0,0,0,.25)"/>
               </a-input>
             </a-col>
@@ -29,16 +29,17 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item class="loginBtn">
-
-          <a-button type="info" shape="circle"  @click="resetForm" style="margin: 10px">
-            <a-icon type="close-circle"/>
-          </a-button>
           <a-button type="primary" @click="login" @keyup.enter="login" style="margin: 10px">
             登录
           </a-button>
-          <a-button type="primary" @click="register" style="margin: 10px">
-            点我注册
+          <a-button @click="resetForm" style="margin: 10px">
+            取消
           </a-button>
+        </a-form-model-item>
+        <a-form-model-item class="loginBtn">
+          <a class="bottomText" @click="forget">忘记密码？点我找回</a>
+          <a class="bottomText" @click="register">没有账号？点我注册</a>
+
         </a-form-model-item>
       </a-form-model>
     </div>
@@ -47,6 +48,7 @@
 
 <script>
 import SIdentify from '../components/authCode/loginValid'
+import {validatePassword, validateUsername} from "@/plugin/validator";
 
 export default {
   components: {SIdentify},
@@ -65,18 +67,15 @@ export default {
         password: '',
       },
       rules: {
-        username: [
-          {required: true, message: "请输入用户名", trigger: 'blur'},
-          {min: 4, max: 12, message: "用户名必须在4-12字符之间", trigger: 'blur'}
-        ],
-        password: [
-          {required: true, message: "请输入密码", trigger: 'blur'},
-          {min: 10, max: 20, message: "密码必须在10-20字符之间", trigger: 'blur'}
-        ]
+        username: validateUsername,
+        password: validatePassword
       }
     }
   },
   methods: {
+    forget() {
+      console.log("sssssss")
+    },
     resetForm() {
       this.$refs.loginFormRef.resetFields()
     },
@@ -94,16 +93,16 @@ export default {
           return this.$message.error("验证码不正确，请重新输入")
 
         }
-        const {data:res}= await this.$http.post("/login",this.formdata)
-        if(res.code===0){
-          if(res.data.user.role!==1){
+        const {data: res} = await this.$http.post("/login", this.formdata)
+        if (res.code === 0) {
+          if (res.data.user.role !== 1) {
             this.refreshCode()
             return this.$message.error("权限不足")
           }
           window.sessionStorage.setItem("token", res.data.token)
           this.$message.success("登录成功")
           await this.$router.push("/index")
-        }else {
+        } else {
           this.refreshCode()
           this.$message.info(res.msg)
         }
@@ -162,6 +161,11 @@ export default {
 .loginBtn {
   display: flex;
   justify-content: flex-end;
+}
+
+.bottomText {
+  padding: 10px;
+  text-decoration: underline;
 }
 
 </style>

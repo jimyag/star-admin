@@ -18,6 +18,11 @@
             <a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.25)"/>
           </a-input-password>
         </a-form-model-item>
+        <a-form-model-item has-feedback prop="email">
+          <a-input v-model="newUser.email" placeholder="请输入邮箱">
+            <a-icon slot="prefix" type="mail" style="color:rgba(0,0,0,.25)"/>
+          </a-input>
+        </a-form-model-item>
         <!--验证码-->
         <a-form-model-item :model="code" :span="13">
           <a-row>
@@ -27,7 +32,7 @@
               </div>
             </a-col>
             <a-col :span="18">
-              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码" >
+              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码">
                 <a-icon slot="prefix" type="question-circle" style="color:rgba(0,0,0,.25)"/>
               </a-input>
             </a-col>
@@ -50,6 +55,7 @@
 
 <script>
 import SIdentify from '../components/authCode/loginValid'
+import {validatePassword,validateUsername,validateEmail} from "@/plugin/validator";
 
 export default {
   components: {SIdentify},
@@ -61,42 +67,16 @@ export default {
   data() {
     return {
       newUser: {
+        email: "",
         username: '',
         password: '',
         role: 2,
         checkPass: '',
       },
       addUserRules: {
-        username: [
-          {
-            validator: (rule, value, callback) => {
-              if (this.newUser.username === '') {
-                callback(new Error('请输入用户名'))
-              }
-              if ([...this.newUser.username].length < 4 || [...this.newUser.username].length > 12) {
-                callback(new Error('用户名应当在4到12个字符之间'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
-        password: [
-          {
-            validator: (rule, value, callback) => {
-              if (this.newUser.password === '') {
-                callback(new Error('请输入密码'))
-              }
-              if ([...this.newUser.password].length < 10 || [...this.newUser.password].length > 20) {
-                callback(new Error('密码应当在6到20位之间'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur',
-          },
-        ],
+        email: validateEmail,
+        username: validateUsername,
+        password: validatePassword,
         checkpass: [
           {
             validator: (rule, value, callback) => {
