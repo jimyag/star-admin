@@ -27,7 +27,7 @@
               </div>
             </a-col>
             <a-col :span="18">
-              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码" size="">
+              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码" >
                 <a-icon slot="prefix" type="question-circle" style="color:rgba(0,0,0,.25)"/>
               </a-input>
             </a-col>

@@ -21,7 +21,7 @@
               </div>
             </a-col>
             <a-col :span="18">
-              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码" size="">
+              <a-input v-model="code" auto-complete="off" placeholder="请输入验证码" >
                 <a-icon slot="prefix" type="question-circle" style="color:rgba(0,0,0,.25)"/>
               </a-input>
             </a-col>
@@ -30,7 +30,7 @@
         </a-form-model-item>
         <a-form-model-item class="loginBtn">
 
-          <a-button type="info" shape="circle" :size="size" @click="resetForm" style="margin: 10px">
+          <a-button type="info" shape="circle"  @click="resetForm" style="margin: 10px">
             <a-icon type="close-circle"/>
           </a-button>
           <a-button type="primary" @click="login" @keyup.enter="login" style="margin: 10px">
