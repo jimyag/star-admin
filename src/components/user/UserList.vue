@@ -41,7 +41,7 @@
                 @click="deleteUser(data.id)"
             >删除
             </a-button>
-            <a-button type="info" icon="info" @click="ChangePassword(data.ID)">修改密码</a-button>
+            <a-button type="info" icon="info" @click="ChangePassword(data.id)">修改密码</a-button>
           </div>
         </template>
       </a-table>
@@ -106,6 +106,9 @@
         destroyOnClose
     >
       <a-form-model :model="changePassword" :rules="changePasswordRules" ref="changePasswordRef">
+        <a-form-model-item has-feedback label="原密码" prop="oldPassword">
+          <a-input-password v-model="changePassword.oldPassword"></a-input-password>
+        </a-form-model-item>
         <a-form-model-item has-feedback label="密码" prop="password">
           <a-input-password v-model="changePassword.password"></a-input-password>
         </a-form-model-item>
@@ -175,6 +178,8 @@ export default {
       },
       changePassword: {
         id: 0,
+        geterPassword: "",
+        oldPassword: "",
         password: '',
         checkPass: '',
       },
@@ -280,6 +285,21 @@ export default {
         ],
       },
       changePasswordRules: {
+        oldPassword:[
+          {
+            validator: (rule, value, callback) => {
+              if (this.changePassword.oldPassword === '') {
+                callback(new Error('请输入原密码'))
+              }
+              if ([...this.changePassword.oldPassword].length < 10 || [...this.changePassword.oldPassword].length > 20) {
+                callback(new Error('密码应当在10到20位之间'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur',
+          },
+        ],
         password: [
           {
             validator: (rule, value, callback) => {
@@ -395,7 +415,6 @@ export default {
       this.$refs.addUserRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数不符合要求，请重新输入')
         const {data: res} = await this.$http.post('/register', this.newUser) //es6的语法糖 解构赋值
-        console.log(res)
         if (res.code !== 0) {
           return this.$message.error(res.msg)
         }
@@ -426,8 +445,12 @@ export default {
     editUserOk() {
       this.$refs.addUserRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数不符合要求，请重新输入')
-        const {data: res} = await this.$http.put(`user/${this.userInfo.id}`, {
+        const {data: resUsername} = await this.$http.put(`user/${this.userInfo.id}/username`, {
           username: this.userInfo.username,
+        })
+        if (resUsername.code !== 0) return this.$message.error(resUsername.msg)
+
+        const {data: res} = await this.$http.put(`user/${this.userInfo.id}/role`, {
           role: this.userInfo.role,
         })
         if (res.code !== 0) return this.$message.error(res.msg)
@@ -444,19 +467,26 @@ export default {
     // 修改密码
     async ChangePassword(id) {
       this.changePasswordVisible = true
-      // const {data: res} = await this.$http.get(`user/${id}`)
+      const {data: res} = await this.$http.get(`user/${id}`)
+      this.changePassword.geterPassword = res.password
       this.changePassword.id = id
     },
     changePasswordOk() {
       this.$refs.changePasswordRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数不符合要求，请重新输入')
-        // const {data: res} = await this.$http.put(`admin/changepw/${this.changePassword.id}`, {
-        //   password: this.changePassword.password,
-        // })
-        // if (res.status != 200) return this.$message.error(res.message)
+        console.log(this.changePassword.id)
+        if (this.changePassword.oldPassword !== this.changePassword.geterPassword) {
+          return this.$message.error("原密码错误！")
+        }
+        const {data: res} = await this.$http.put(`user/${this.changePassword.id}/password`, {
+          password: this.changePassword.password,
+        })
+        console.log(res)
+        if (res.code !== 0) return this.$message.error(res.msg)
         this.changePasswordVisible = false
         this.$message.success('修改密码成功')
         this.getUserList()
+        this.$refs.changePasswordRef.resetFields()
       })
     },
     changePasswordCancel() {
