@@ -13,7 +13,7 @@ import zh_CN from 'ant-design-vue/lib/locale-provider/zh_CN'
 export default {
   data(){
     return{
-      local:zh_CN
+      locale:zh_CN
     }
   }
 }
