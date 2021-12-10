@@ -72,6 +72,7 @@
 <script>
 import SIdentify from '../components/authCode/loginValid'
 import {validatePassword, validateUsername, validateEmail, validateCode} from "@/plugin/validator";
+
 const MSGINIT = '发送验证码'
 // const MSGERROR = '验证码发送失败'
 const MSGSCUCCESS = '${time}秒后重发'
@@ -125,14 +126,19 @@ export default {
   },
   methods: {
     handleSend() {
-      this.$refs.addUserRef.validateField("email",(verifycode_check)=>{
-        if(verifycode_check){
+      this.$refs.addUserRef.validateField("email", (verifycode_check) => {
+        if (verifycode_check) {
           return this.$message.error("邮箱验证未通过")
-        }
-        else {
-          this.$message.info("验证码已发送，请注意查收")
-          if (this.msgKey) return
-
+        } else {
+          const {data: res} = this.$http.post(`email/${this.newUser.email}`)
+          if(res.code===0){
+            this.$message.info("验证码已发送，请注意查收")
+          }else {
+            this.$message.error(res.msg)
+          }
+          if (this.msgKey) {
+            return
+          }
           this.msgText = MSGSCUCCESS.replace('${time}', this.msgTime)
           this.msgKey = true
           const time = setInterval(() => {
@@ -157,7 +163,6 @@ export default {
       this.$router.push('/login')
     },
     register() {
-      // console.log(this.$refs)
       this.$refs.addUserRef.validate(async valid => {
         if (!valid) {
           return this.$message.error("输入非法数据，请重新输入")
