@@ -373,7 +373,7 @@ export default {
     addUserOk() {
       this.$refs.addUserRef.validate(async (valid) => {
         if (!valid) return this.$message.error('参数不符合要求，请重新输入')
-        const {data: res} = await this.$http.post('/register', this.newUser) //es6的语法糖 解构赋值
+        const {data: res} = await this.$http.post('admin/register', this.newUser) //es6的语法糖 解构赋值
         if (res.code !== 0) {
           return this.$message.error(res.msg)
         }
