@@ -125,36 +125,37 @@ export default {
     }
   },
   methods: {
-    handleSend() {
+    async handleSend() {
+      console
       this.$refs.addUserRef.validateField("email", (verifycode_check) => {
         if (verifycode_check) {
           return this.$message.error("邮箱验证未通过")
-        } else {
-          const {data: res} = this.$http.post(`email/${this.newUser.email}`)
-          if(res.code===0){
-            this.$message.info("验证码已发送，请注意查收")
-          }else {
-            this.$message.error(res.msg)
-          }
-          if (this.msgKey) {
-            return
-          }
-          this.msgText = MSGSCUCCESS.replace('${time}', this.msgTime)
-          this.msgKey = true
-          const time = setInterval(() => {
-            this.msgTime--
-            this.msgText = MSGSCUCCESS.replace('${time}', this.msgTime)
-            const msgKey = false;
-            if (this.msgTime === 0) {
-              this.msgTime = MSGTIME
-              this.msgText = MSGINIT
-              this.msgKey = msgKey
-              clearInterval(time)
-            }
-          }, 1000)
         }
       })
-
+      console.log("sss")
+      const {data: res} = await this.$http.post(`email/${this.newUser.email}`)
+      console.log(res)
+      if (res.code === 0) {
+        this.$message.info("验证码已发送，请注意查收")
+      } else {
+        this.$message.error(res.msg)
+      }
+      if (this.msgKey) {
+        return
+      }
+      this.msgText = MSGSCUCCESS.replace('${time}', this.msgTime)
+      this.msgKey = false
+      const time = setInterval(() => {
+        this.msgTime--
+        this.msgText = MSGSCUCCESS.replace('${time}', this.msgTime)
+        const msgKey = false;
+        if (this.msgTime === 0) {
+          this.msgTime = MSGTIME
+          this.msgText = MSGINIT
+          this.msgKey = msgKey
+          clearInterval(time)
+        }
+      }, 1000)
     },
     resetForm() {
       this.$refs.addUserRef.resetFields()
